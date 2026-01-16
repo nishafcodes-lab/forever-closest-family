@@ -1,4 +1,5 @@
 import { Heart, GraduationCap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -27,7 +28,13 @@ const Footer = () => {
 
           <div className="border-t border-background/20 pt-6 mt-6">
             <p className="text-sm text-background/50">
-              Designed with ❤️ by <span className="text-background/80 font-medium">CS Coders</span>
+              Designed with ❤️ by{" "}
+              <Link 
+                to="/admin-login" 
+                className="text-background/80 font-medium hover:text-background transition-colors"
+              >
+                CS Coders
+              </Link>
             </p>
             <p className="text-xs text-background/40 mt-2">
               © 2025 BSCS Reunion. All rights reserved.
