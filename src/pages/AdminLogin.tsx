@@ -36,15 +36,19 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log("Login attempt with:", email);
     const { error } = await signIn(email, password);
+    console.log("Login result - error:", error);
 
     if (error) {
+      console.error("Login error details:", error);
       toast({
         title: "Login Failed",
         description: error.message,
         variant: "destructive",
       });
     } else {
+      console.log("Login successful, redirecting...");
       toast({
         title: "Welcome Back! 🎓",
         description: "Redirecting to admin panel...",
