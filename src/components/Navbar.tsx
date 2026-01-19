@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, GraduationCap, Shield } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -15,69 +16,123 @@ const navLinks = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b">
+    <motion.nav 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? "glass-card border-b shadow-sm" : "bg-transparent"
+      }`}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <a href="#home" className="flex items-center gap-2 text-primary font-display font-bold text-xl">
+          <motion.a 
+            href="#home" 
+            className="flex items-center gap-2 text-primary font-display font-bold text-xl"
+            whileHover={{ scale: 1.05 }}
+          >
             <GraduationCap className="w-6 h-6" />
             <span>BSCS Reunion</span>
-          </a>
+          </motion.a>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <a
+            {navLinks.map((link, index) => (
+              <motion.a
                 key={link.name}
                 href={link.href}
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 text-sm font-medium"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 text-sm font-medium relative"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{ y: -2 }}
               >
                 {link.name}
-              </a>
+                <motion.span
+                  className="absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left"
+                  initial={{ scaleX: 0 }}
+                  whileHover={{ scaleX: 1 }}
+                  transition={{ duration: 0.2 }}
+                />
+              </motion.a>
             ))}
-            <Link to="/admin/login">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Shield className="w-4 h-4" />
-                Admin
-              </Button>
-            </Link>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Link to="/admin/login">
+                <Button variant="outline" size="sm" className="gap-2 rounded-full">
+                  <Shield className="w-4 h-4" />
+                  Admin
+                </Button>
+              </Link>
+            </motion.div>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
+          <motion.button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 text-foreground"
+            whileTap={{ scale: 0.95 }}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          </motion.button>
         </div>
 
         {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="block py-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-              >
-                {link.name}
-              </a>
-            ))}
-            <Link
-              to="/admin/login"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 py-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div 
+              className="md:hidden py-4 border-t border-border"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <Shield className="w-4 h-4" />
-              Admin Panel
-            </Link>
-          </div>
-        )}
+              {navLinks.map((link, index) => (
+                <motion.a
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className="block py-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  {link.name}
+                </motion.a>
+              ))}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.35 }}
+              >
+                <Link
+                  to="/admin/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 py-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin Panel
+                </Link>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </nav>
+    </motion.nav>
   );
 };
 

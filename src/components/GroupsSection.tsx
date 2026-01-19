@@ -1,6 +1,9 @@
 import { Heart, Users } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
+import { SkeletonGroupCard } from "@/components/ui/skeleton-card";
 
 interface StudentGroup {
   id: string;
@@ -75,87 +78,110 @@ const GroupsSection = () => {
   const getEmoji = (index: number) => groupEmojis[index % groupEmojis.length];
   const getColor = (index: number) => groupColors[index % groupColors.length];
 
-  if (loading) {
-    return (
-      <section id="groups" className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground">Loading groups...</p>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section id="groups" className="py-24 bg-muted/30">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
+    <section id="groups" className="py-24 bg-muted/30 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <AnimatedSection className="text-center mb-16">
+          <motion.div 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4"
+            whileHover={{ scale: 1.05 }}
+          >
             <Users className="w-4 h-4" />
             <span className="text-sm font-medium">Friend Circles</span>
-          </div>
+          </motion.div>
           <h2 className="font-display text-4xl md:text-5xl font-bold gradient-text mb-4">
             Student Groups
           </h2>
           <p className="text-muted-foreground flex items-center justify-center gap-2">
-            Same vibes, different groups <Heart className="w-4 h-4 text-accent fill-accent" />
+            Same vibes, different groups 
+            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+              <Heart className="w-4 h-4 text-accent fill-accent" />
+            </motion.div>
           </p>
-        </div>
+        </AnimatedSection>
 
-        {groups.length === 0 ? (
-          <div className="text-center text-muted-foreground">
-            <p>No groups created yet. Check back soon!</p>
-          </div>
-        ) : (
+        {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <SkeletonGroupCard key={i} />
+            ))}
+          </div>
+        ) : groups.length === 0 ? (
+          <AnimatedSection className="text-center text-muted-foreground">
+            <p>No groups created yet. Check back soon!</p>
+          </AnimatedSection>
+        ) : (
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {groups.map((group, index) => {
               const groupMembers = members[group.id] || [];
               
               return (
-                <div
-                  key={group.id}
-                  className="group bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-500 hover:-translate-y-2"
-                >
-                  {/* Photo or Placeholder */}
-                  <div className={`h-48 relative overflow-hidden ${!group.photo_url ? `bg-gradient-to-br ${getColor(index)}` : ''}`}>
-                    {group.photo_url ? (
-                      <img
-                        src={group.photo_url}
-                        alt={group.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-6xl group-hover:scale-110 transition-transform duration-300">
-                          {getEmoji(index)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                <StaggerItem key={group.id}>
+                  <motion.div
+                    className="group bg-card rounded-2xl overflow-hidden card-shadow h-full"
+                    whileHover={{ y: -12, boxShadow: "var(--shadow-hover)" }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* Photo or Placeholder */}
+                    <div className={`h-48 relative overflow-hidden ${!group.photo_url ? `bg-gradient-to-br ${getColor(index)}` : ''}`}>
+                      {group.photo_url ? (
+                        <motion.img
+                          src={group.photo_url}
+                          alt={group.name}
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ duration: 0.5 }}
+                        />
+                      ) : (
+                        <motion.div 
+                          className="w-full h-full flex items-center justify-center"
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <span className="text-6xl">
+                            {getEmoji(index)}
+                          </span>
+                        </motion.div>
+                      )}
+                      {/* Overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
 
-                  <div className="p-5">
-                    <h3 className="font-display text-lg font-semibold mb-2 flex items-center gap-2">
-                      {group.name} <span>{getEmoji(index)}</span>
-                    </h3>
-                    {group.description && (
-                      <p className="text-sm text-muted-foreground mb-3">{group.description}</p>
-                    )}
-                    {groupMembers.length > 0 ? (
-                      <ul className="space-y-1.5">
-                        {groupMembers.map((member) => (
-                          <li key={member} className="text-sm text-muted-foreground flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
-                            {member}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-muted-foreground/70 italic">No members yet</p>
-                    )}
-                  </div>
-                </div>
+                    <div className="p-5">
+                      <h3 className="font-display text-lg font-semibold mb-2 flex items-center gap-2">
+                        {group.name} <span>{getEmoji(index)}</span>
+                      </h3>
+                      {group.description && (
+                        <p className="text-sm text-muted-foreground mb-3">{group.description}</p>
+                      )}
+                      {groupMembers.length > 0 ? (
+                        <ul className="space-y-1.5">
+                          {groupMembers.map((member, mIndex) => (
+                            <motion.li 
+                              key={member} 
+                              className="text-sm text-muted-foreground flex items-center gap-2"
+                              initial={{ opacity: 0, x: -10 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              transition={{ delay: mIndex * 0.05 }}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
+                              {member}
+                            </motion.li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground/70 italic">No members yet</p>
+                      )}
+                    </div>
+                  </motion.div>
+                </StaggerItem>
               );
             })}
-          </div>
+          </StaggerContainer>
         )}
       </div>
     </section>
