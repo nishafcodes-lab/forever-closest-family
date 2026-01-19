@@ -1,7 +1,10 @@
 import { Calendar, MapPin, Clock, Users, Phone, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
+import { FloatingParticles } from "@/components/ui/floating-particles";
 
 interface ReunionInfo {
   reunion_date: string | null;
@@ -79,97 +82,147 @@ const ReunionSection = () => {
     <section id="reunion" className="py-24 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 gradient-bg" />
+      <FloatingParticles count={15} />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent mb-4">
+        <AnimatedSection className="text-center mb-16">
+          <motion.div 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent mb-4"
+            whileHover={{ scale: 1.05 }}
+          >
             <Calendar className="w-4 h-4" />
             <span className="text-sm font-medium">Save The Date</span>
-          </div>
+          </motion.div>
           <h2 className="font-display text-4xl md:text-5xl font-bold gradient-text mb-4">
             Reunion Event
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             {reunionInfo?.description || "Let's meet again and relive the beautiful memories"}
           </p>
-        </div>
+        </AnimatedSection>
 
         {/* Countdown Timer */}
         {reunionInfo?.countdown_enabled && reunionInfo?.reunion_date && (
-          <div className="max-w-3xl mx-auto mb-16">
-            <div className="grid grid-cols-4 gap-4">
-              {countdownItems.map((item) => (
-                <div
-                  key={item.label}
-                  className="glass-card rounded-2xl p-4 md:p-6 text-center card-shadow"
-                >
-                  <div className="font-display text-3xl md:text-5xl font-bold gradient-text mb-1">
-                    {item.value.toString().padStart(2, "0")}
-                  </div>
-                  <div className="text-xs md:text-sm text-muted-foreground uppercase tracking-wide">
-                    {item.label}
-                  </div>
-                </div>
+          <AnimatedSection className="max-w-3xl mx-auto mb-16">
+            <StaggerContainer className="grid grid-cols-4 gap-4">
+              {countdownItems.map((item, index) => (
+                <StaggerItem key={item.label}>
+                  <motion.div
+                    className="glass-card rounded-2xl p-4 md:p-6 text-center card-shadow"
+                    whileHover={{ y: -8, boxShadow: "var(--shadow-hover)" }}
+                  >
+                    <motion.div 
+                      className="font-display text-3xl md:text-5xl font-bold gradient-text mb-1"
+                      key={item.value}
+                      initial={{ scale: 1.2 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {item.value.toString().padStart(2, "0")}
+                    </motion.div>
+                    <div className="text-xs md:text-sm text-muted-foreground uppercase tracking-wide">
+                      {item.label}
+                    </div>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
-          </div>
+            </StaggerContainer>
+          </AnimatedSection>
         )}
 
         {/* Event Details */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          <div className="glass-card rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-500 text-center">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="font-display text-lg font-semibold mb-2">Date</h3>
-            <p className="text-muted-foreground">{formattedDate}</p>
-          </div>
+        <StaggerContainer className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <StaggerItem>
+            <motion.div 
+              className="glass-card rounded-2xl p-6 card-shadow text-center h-full"
+              whileHover={{ y: -8, boxShadow: "var(--shadow-hover)" }}
+            >
+              <motion.div 
+                className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center"
+                whileHover={{ scale: 1.1, rotate: 10 }}
+              >
+                <Calendar className="w-6 h-6 text-primary" />
+              </motion.div>
+              <h3 className="font-display text-lg font-semibold mb-2">Date</h3>
+              <p className="text-muted-foreground">{formattedDate}</p>
+            </motion.div>
+          </StaggerItem>
 
-          <div className="glass-card rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-500 text-center">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-secondary/10 flex items-center justify-center">
-              <Clock className="w-6 h-6 text-secondary" />
-            </div>
-            <h3 className="font-display text-lg font-semibold mb-2">Time</h3>
-            <p className="text-muted-foreground">{formattedTime} Onwards</p>
-          </div>
+          <StaggerItem>
+            <motion.div 
+              className="glass-card rounded-2xl p-6 card-shadow text-center h-full"
+              whileHover={{ y: -8, boxShadow: "var(--shadow-hover)" }}
+            >
+              <motion.div 
+                className="w-14 h-14 mx-auto mb-4 rounded-full bg-secondary/10 flex items-center justify-center"
+                whileHover={{ scale: 1.1, rotate: -10 }}
+              >
+                <Clock className="w-6 h-6 text-secondary" />
+              </motion.div>
+              <h3 className="font-display text-lg font-semibold mb-2">Time</h3>
+              <p className="text-muted-foreground">{formattedTime} Onwards</p>
+            </motion.div>
+          </StaggerItem>
 
-          <div className="glass-card rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-500 text-center">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-accent" />
-            </div>
-            <h3 className="font-display text-lg font-semibold mb-2">Venue</h3>
-            <p className="text-muted-foreground">{reunionInfo?.venue || "TBA"}</p>
-            {reunionInfo?.venue_address && (
-              <p className="text-xs text-muted-foreground/70 mt-1">{reunionInfo.venue_address}</p>
-            )}
-          </div>
-        </div>
+          <StaggerItem>
+            <motion.div 
+              className="glass-card rounded-2xl p-6 card-shadow text-center h-full"
+              whileHover={{ y: -8, boxShadow: "var(--shadow-hover)" }}
+            >
+              <motion.div 
+                className="w-14 h-14 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center"
+                whileHover={{ scale: 1.1, rotate: 10 }}
+              >
+                <MapPin className="w-6 h-6 text-accent" />
+              </motion.div>
+              <h3 className="font-display text-lg font-semibold mb-2">Venue</h3>
+              <p className="text-muted-foreground">{reunionInfo?.venue || "TBA"}</p>
+              {reunionInfo?.venue_address && (
+                <p className="text-xs text-muted-foreground/70 mt-1">{reunionInfo.venue_address}</p>
+              )}
+            </motion.div>
+          </StaggerItem>
+        </StaggerContainer>
 
         {/* Contact Info */}
         {(reunionInfo?.contact_email || reunionInfo?.contact_phone) && (
-          <div className="mt-8 flex flex-wrap justify-center gap-6">
-            {reunionInfo.contact_email && (
-              <a href={`mailto:${reunionInfo.contact_email}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                <Mail className="w-4 h-4" />
-                {reunionInfo.contact_email}
-              </a>
-            )}
-            {reunionInfo.contact_phone && (
-              <a href={`tel:${reunionInfo.contact_phone}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                <Phone className="w-4 h-4" />
-                {reunionInfo.contact_phone}
-              </a>
-            )}
-          </div>
+          <AnimatedSection className="mt-8" delay={0.3}>
+            <div className="flex flex-wrap justify-center gap-6">
+              {reunionInfo.contact_email && (
+                <motion.a 
+                  href={`mailto:${reunionInfo.contact_email}`} 
+                  className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <Mail className="w-4 h-4" />
+                  {reunionInfo.contact_email}
+                </motion.a>
+              )}
+              {reunionInfo.contact_phone && (
+                <motion.a 
+                  href={`tel:${reunionInfo.contact_phone}`} 
+                  className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <Phone className="w-4 h-4" />
+                  {reunionInfo.contact_phone}
+                </motion.a>
+              )}
+            </div>
+          </AnimatedSection>
         )}
 
         {/* RSVP CTA */}
-        <div className="text-center mt-12">
-          <button className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <AnimatedSection className="text-center mt-12" delay={0.4}>
+          <motion.button 
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-full font-medium shadow-lg"
+            whileHover={{ scale: 1.05, boxShadow: "0 20px 40px -10px hsl(var(--primary) / 0.4)" }}
+            whileTap={{ scale: 0.98 }}
+          >
             <Users className="w-5 h-5" />
             Confirm Your Attendance
-          </button>
-        </div>
+          </motion.button>
+        </AnimatedSection>
       </div>
     </section>
   );
