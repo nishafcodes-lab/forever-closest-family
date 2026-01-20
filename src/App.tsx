@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
 import ResetPassword from "./pages/ResetPassword";
+import StudentDirectory from "./pages/StudentDirectory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/students" element={<StudentDirectory />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/admin/reset-password" element={<ResetPassword />} />
