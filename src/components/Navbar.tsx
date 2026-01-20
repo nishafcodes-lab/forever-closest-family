@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, GraduationCap, Shield } from "lucide-react";
+import { Menu, X, GraduationCap, Shield, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
@@ -71,7 +71,14 @@ const Navbar = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
+              className="flex items-center gap-2"
             >
+              <Link to="/students">
+                <Button variant="ghost" size="sm" className="gap-2 rounded-full">
+                  <Users className="w-4 h-4" />
+                  Directory
+                </Button>
+              </Link>
               <Link to="/admin/login">
                 <Button variant="outline" size="sm" className="gap-2 rounded-full">
                   <Shield className="w-4 h-4" />
@@ -118,6 +125,20 @@ const Navbar = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.35 }}
+              >
+                <Link
+                  to="/students"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 py-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                >
+                  <Users className="w-4 h-4" />
+                  Student Directory
+                </Link>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
               >
                 <Link
                   to="/admin/login"
