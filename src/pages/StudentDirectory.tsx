@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Search, Filter, Users, Mail, GraduationCap, ArrowLeft, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Filter, Users, Mail, GraduationCap, ArrowLeft, X, Calendar, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AnimatedSection } from "@/components/ui/animated-section";
 
 interface Student {
@@ -17,6 +18,7 @@ interface Student {
   photo_url: string | null;
   bio: string | null;
   email: string | null;
+  created_at?: string;
 }
 
 const StudentDirectory = () => {
@@ -25,6 +27,7 @@ const StudentDirectory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState<string>("all");
   const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   useEffect(() => {
     fetchStudents();
@@ -73,6 +76,28 @@ const StudentDirectory = () => {
   };
 
   const hasActiveFilters = searchTerm || selectedBatch !== "all" || selectedRole !== "all";
+
+  const getRoleBadgeColor = (role: string | null) => {
+    switch (role) {
+      case "CR":
+        return "bg-blue-500 hover:bg-blue-600 text-white";
+      case "GR":
+        return "bg-green-500 hover:bg-green-600 text-white";
+      default:
+        return "bg-primary hover:bg-primary/90 text-primary-foreground";
+    }
+  };
+
+  const getRoleFullName = (role: string | null) => {
+    switch (role) {
+      case "CR":
+        return "Class Representative";
+      case "GR":
+        return "Group Representative";
+      default:
+        return role;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -230,7 +255,8 @@ const StudentDirectory = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="group"
+                className="group cursor-pointer"
+                onClick={() => setSelectedStudent(student)}
               >
                 <div className="bg-card rounded-2xl border border-border p-6 h-full transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1">
                   {/* Photo */}
@@ -249,15 +275,7 @@ const StudentDirectory = () => {
                     {/* Role Badge */}
                     {student.role && student.role !== "Student" && (
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
-                        <Badge
-                          className={`text-xs ${
-                            student.role === "CR"
-                              ? "bg-blue-500 hover:bg-blue-600"
-                              : student.role === "GR"
-                              ? "bg-green-500 hover:bg-green-600"
-                              : "bg-primary"
-                          }`}
-                        >
+                        <Badge className={`text-xs ${getRoleBadgeColor(student.role)}`}>
                           {student.role}
                         </Badge>
                       </div>
@@ -281,13 +299,10 @@ const StudentDirectory = () => {
                     )}
 
                     {student.email && (
-                      <a
-                        href={`mailto:${student.email}`}
-                        className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
-                      >
+                      <span className="inline-flex items-center gap-1 text-sm text-primary">
                         <Mail className="w-4 h-4" />
                         Contact
-                      </a>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -303,6 +318,130 @@ const StudentDirectory = () => {
           </div>
         )}
       </main>
+
+      {/* Student Profile Modal */}
+      <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudent(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <AnimatePresence mode="wait">
+            {selectedStudent && (
+              <motion.div
+                key={selectedStudent.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <DialogHeader className="sr-only">
+                  <DialogTitle>{selectedStudent.name}'s Profile</DialogTitle>
+                </DialogHeader>
+
+                <div className="flex flex-col items-center pt-4">
+                  {/* Large Photo */}
+                  <div className="relative w-32 h-32 mb-6">
+                    {selectedStudent.photo_url ? (
+                      <img
+                        src={selectedStudent.photo_url}
+                        alt={selectedStudent.name}
+                        className="w-full h-full rounded-full object-cover border-4 border-primary/20 shadow-xl"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-5xl border-4 border-primary/20 shadow-xl">
+                        {selectedStudent.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Name and Role */}
+                  <h2 className="text-2xl font-bold text-foreground mb-2">{selectedStudent.name}</h2>
+                  {selectedStudent.role && (
+                    <Badge className={`mb-4 ${getRoleBadgeColor(selectedStudent.role)}`}>
+                      {getRoleFullName(selectedStudent.role)}
+                    </Badge>
+                  )}
+
+                  {/* Info Cards */}
+                  <div className="w-full space-y-3 mt-4">
+                    {/* Batch */}
+                    <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <GraduationCap className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Batch</p>
+                        <p className="font-semibold text-foreground">{selectedStudent.batch}</p>
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    {selectedStudent.email && (
+                      <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Mail className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wide">Email</p>
+                          <a
+                            href={`mailto:${selectedStudent.email}`}
+                            className="font-semibold text-primary hover:underline truncate block"
+                          >
+                            {selectedStudent.email}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Bio */}
+                    {selectedStudent.bio && (
+                      <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-xl">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <User className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">About</p>
+                          <p className="text-foreground leading-relaxed">{selectedStudent.bio}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Member Since */}
+                    {selectedStudent.created_at && (
+                      <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Calendar className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wide">Member Since</p>
+                          <p className="font-semibold text-foreground">
+                            {new Date(selectedStudent.created_at).toLocaleDateString("en-US", {
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 mt-6 w-full">
+                    {selectedStudent.email && (
+                      <Button asChild className="flex-1">
+                        <a href={`mailto:${selectedStudent.email}`}>
+                          <Mail className="w-4 h-4 mr-2" />
+                          Send Email
+                        </a>
+                      </Button>
+                    )}
+                    <Button variant="outline" onClick={() => setSelectedStudent(null)} className="flex-1">
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
