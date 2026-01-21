@@ -80,9 +80,9 @@ const DashboardTab = () => {
           <div className="mt-4 pt-4 border-t border-border">
             <p className="font-medium text-foreground mb-2">GRs:</p>
             <ul className="list-disc list-inside ml-2">
-              <li>Iqra Aslam</li>
+              <li>Iqra Bibi</li>
               <li>Tahira Mustaq</li>
-              <li>Fizza Asghar</li>
+              
             </ul>
           </div>
           <div className="mt-4">
