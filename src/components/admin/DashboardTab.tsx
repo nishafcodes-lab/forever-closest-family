@@ -82,6 +82,7 @@ const DashboardTab = () => {
             <ul className="list-disc list-inside ml-2">
               <li>Iqra Bibi</li>
               <li>Tahira Mustaq</li>
+              <li>Fizza Asghar</li>
               
             </ul>
           </div>

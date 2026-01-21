@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
 
 const leaders = [
-  { role: "GRs", names: ["Iqra Bibi", "Tahira Mustaq",], icon: Star },
+  { role: "GRs", names: ["Iqra Bibi", "Tahira Mustaq","Fizza Asghar"], icon: Star },
   { role: "CRs", names: ["Muhammad Saqib", "Hamza Aslam"], icon: Trophy },
 ];
 
